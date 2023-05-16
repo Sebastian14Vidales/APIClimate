@@ -1,7 +1,7 @@
 const container = document.querySelector('.container');
 const resultado = document.querySelector('#resultado');
 const formulario = document.querySelector('#formulario');
-
+const spinner = document.querySelector('.spinner');
 
 document.addEventListener('DOMContentLoaded', () => {
     formulario.addEventListener('submit', buscarClima);
@@ -46,34 +46,32 @@ function mostrarError(mensaje) {
 function consultarAPI(ciudad, pais) {
     const appId = '8d8ddcc6f2cf50bdf7a54a47b32b9c6d';
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${ciudad},${pais}&appid=${appId}`;
+    
     fetch(url)
         .then(resultado => resultado.json())
         .then(datos => {
-            
+
             if (datos.cod === '404') {
                 mostrarError('Ciudad no encontrada');
                 return;
-            }
 
-            // Crear spinner
-            const spinner = document.querySelector('.spinner');
-            spinner.classList.add('block');
-            spinner.classList.remove('hidden');
+                
+            }
+            Spinner(); // Muestra el spinner de carga
 
             // Imprime la respuesta en el HTML
             setTimeout(() => {
-                spinner.remove();
                 mostrarClimaHMTL(datos);
             }, 3000);
         })
+        .catch(error => console.log('Hay un error en el cargue de datos',error))
 }
 
 function mostrarClimaHMTL(datos) {
 
     limpiarHTML();
-
     const { main: { temp, temp_max, temp_min }, name } = datos;
-    
+
     const centigrados = kelvinAcentigrados(temp);
     const max = kelvinAcentigrados(temp_max);
     const min = kelvinAcentigrados(temp_min);
@@ -96,7 +94,7 @@ function mostrarClimaHMTL(datos) {
 
     const resultadoDiv = document.createElement('div');
     resultadoDiv.classList.add('text-center', 'text-white');
-    
+
     resultadoDiv.appendChild(nombre);
     resultadoDiv.appendChild(actual);
     resultadoDiv.appendChild(tempMax);
@@ -105,7 +103,7 @@ function mostrarClimaHMTL(datos) {
     resultado.appendChild(resultadoDiv);
 }
 
-const kelvinAcentigrados = grados => parseInt(grados - 273.15); 
+const kelvinAcentigrados = grados => parseInt(grados - 273.15);
 // function kelvinAcentigrados(grados) {
 //     return parseInt(grados - 273.15);
 // }
@@ -115,3 +113,17 @@ function limpiarHTML() {
         resultado.removeChild(resultado.firstChild);
     }
 }
+
+function Spinner() {
+    const spinner = document.createElement('DIV');
+    spinner.classList.add('sk-chase', 'mx-auto', 'mt-6');
+    spinner.innerHTML = `
+        <div class="sk-chase-dot"></div>
+        <div class="sk-chase-dot"></div>
+        <div class="sk-chase-dot"></div>
+        <div class="sk-chase-dot"></div>
+        <div class="sk-chase-dot"></div>
+        <div class="sk-chase-dot"></div>`;
+
+    resultado.appendChild(spinner);
+}   
